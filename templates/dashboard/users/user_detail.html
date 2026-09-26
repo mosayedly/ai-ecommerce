@@ -1,0 +1,124 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% block title %}{{ profile_user.username }} — Admin Dashboard{% endblock %}
+
+{% block dashboard_content %}
+{% include "dashboard/partials/messages.html" %}
+
+<div class="page-header">
+    <h1>{{ profile_user.username }}</h1>
+    <div class="table-actions">
+        <a class="btn btn--ghost" href="{% url 'dashboard:user_list' %}">← Back to Users</a>
+    </div>
+</div>
+
+<div class="detail-grid">
+    <div>
+        <section class="user-card">
+            <h2>Profile</h2>
+            <p class="user-card__name">{{ profile_user.get_full_name|default:profile_user.username }}</p>
+            <p class="meta-text">{{ profile_user.email|default:"no email on file" }}</p>
+            <p>
+                {% if profile_user.is_superuser %}<span class="badge badge--info">Superuser</span>{% endif %}
+                {% if profile_user.is_staff %}
+                    <span class="badge badge--success">Staff</span>
+                {% else %}
+                    <span class="badge badge--muted">Customer</span>
+                {% endif %}
+                {% if profile_user.is_active %}
+                    <span class="badge badge--success">Active</span>
+                {% else %}
+                    <span class="badge badge--danger">Inactive</span>
+                {% endif %}
+            </p>
+            <p class="meta-text">Joined {{ profile_user.date_joined|date:"M d, Y H:i" }}</p>
+            <p class="meta-text">Last login {{ profile_user.last_login|date:"M d, Y H:i"|default:"never" }}</p>
+        </section>
+
+        <section class="user-card">
+            <h2>Activity Summary</h2>
+            <div class="order-summary__row">
+                <span>Orders placed</span>
+                <span>{{ order_count }}</span>
+            </div>
+            <div class="order-summary__row">
+                <span>Total spent</span>
+                <span>${{ total_spent|floatformat:2 }}</span>
+            </div>
+        </section>
+
+        <section class="user-card">
+            <h2>Account Status</h2>
+            {% if is_self %}
+                <p class="meta-text">This is your own account — it cannot be deactivated from here.</p>
+            {% else %}
+                <p class="meta-text">
+                    {% if profile_user.is_active %}
+                        Deactivating blocks this user from logging in.
+                    {% else %}
+                        Activating restores this user's ability to log in.
+                    {% endif %}
+                </p>
+                <form method="post" action="{% url 'dashboard:user_toggle_active' profile_user.pk %}" onsubmit="return confirm('Are you sure?');">
+                    {% csrf_token %}
+                    {% if profile_user.is_active %}
+                        <button type="submit" class="btn btn--danger">Deactivate User</button>
+                    {% else %}
+                        <button type="submit" class="btn btn--primary">Activate User</button>
+                    {% endif %}
+                </form>
+            {% endif %}
+        </section>
+    </div>
+
+    <div>
+        <section>
+            <h2>Recent Orders</h2>
+            {% if recent_orders %}
+                <div class="table-wrap">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Order #</th>
+                            <th>Status</th>
+                            <th>Total</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in recent_orders %}
+                            <tr>
+                                <td><a href="{% url 'dashboard:order_detail' order.order_number %}">{{ order.order_number|slice:":8" }}…</a></td>
+                                <td>{% include "dashboard/partials/status_badge.html" with status=order.status label=order.get_status_display %}</td>
+                                <td>${{ order.total_price }}</td>
+                                <td>{{ order.created_at|date:"M d, Y" }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                </div>
+            {% else %}
+                <p class="empty">This user has not placed any orders yet.</p>
+            {% endif %}
+        </section>
+
+        <section>
+            <h2>Recent Activity</h2>
+            {% if recent_activities %}
+                <ul class="dashboard-list">
+                    {% for activity in recent_activities %}
+                        <li class="dashboard-list__item">
+                            <span>
+                                {{ activity.get_activity_type_display }}
+                                {% if activity.product %}<em>{{ activity.product.name }}</em>{% endif %}
+                            </span>
+                            <span class="dashboard-list__meta">{{ activity.created_at|timesince }} ago</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="empty">No activity recorded for this user yet.</p>
+            {% endif %}
+        </section>
+    </div>
+</div>
+{% endblock %}

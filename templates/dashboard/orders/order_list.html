@@ -1,0 +1,88 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% block title %}Orders — Admin Dashboard{% endblock %}
+
+{% block dashboard_content %}
+{% include "dashboard/partials/messages.html" %}
+
+<div class="page-header">
+    <h1>Orders</h1>
+</div>
+
+<nav class="status-tabs">
+    <a class="status-tab{% if not selected_status %} active{% endif %}" href="{% url 'dashboard:order_list' %}?q={{ q|urlencode }}">
+        All <span class="status-tab__count">{{ total_orders }}</span>
+    </a>
+    {% for tab in status_tabs %}
+        <a class="status-tab{% if tab.value == selected_status %} active{% endif %}" href="{% url 'dashboard:order_list' %}?q={{ q|urlencode }}&status={{ tab.value }}">
+            {{ tab.label }} <span class="status-tab__count">{{ tab.count }}</span>
+        </a>
+    {% endfor %}
+</nav>
+
+<form method="get" action="{% url 'dashboard:order_list' %}" class="filter-bar">
+    <input type="text" name="q" class="form-input" value="{{ q }}" placeholder="Search order number or customer...">
+    <select name="status" class="form-select">
+        <option value="">All statuses</option>
+        {% for value, label in status_choices %}
+            <option value="{{ value }}" {% if value == selected_status %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit" class="btn btn--primary">Apply</button>
+    {% if q or selected_status %}
+        <a class="btn btn--ghost" href="{% url 'dashboard:order_list' %}">Clear</a>
+    {% endif %}
+</form>
+
+{% if orders %}
+    <div class="table-wrap">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Order #</th>
+                <th>Customer</th>
+                <th>Status</th>
+                <th>Total</th>
+                <th>Items</th>
+                <th>Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+                <tr>
+                    <td>{{ order.order_number|slice:":8" }}…</td>
+                    <td>{{ order.user.username|default:"—" }}</td>
+                    <td>{% include "dashboard/partials/status_badge.html" with status=order.status label=order.get_status_display %}</td>
+                    <td>${{ order.total_price }}</td>
+                    <td>{{ order.items.count }}</td>
+                    <td>{{ order.created_at|date:"M d, Y H:i" }}</td>
+                    <td>
+                        <div class="table-actions">
+                            <a class="btn btn--ghost" href="{% url 'dashboard:order_detail' order.order_number %}">View</a>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+
+    <nav class="pagination">
+        {% if page_obj.has_previous %}
+            <a class="btn btn--ghost" href="{% url 'dashboard:order_list' %}?q={{ q|urlencode }}&status={{ selected_status|urlencode }}&page={{ page_obj.previous_page_number }}">Previous</a>
+        {% endif %}
+        <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+            <a class="btn btn--ghost" href="{% url 'dashboard:order_list' %}?q={{ q|urlencode }}&status={{ selected_status|urlencode }}&page={{ page_obj.next_page_number }}">Next</a>
+        {% endif %}
+    </nav>
+{% else %}
+    <div class="empty-state">
+        {% if q or selected_status %}
+            <p>No orders match your filters.</p>
+        {% else %}
+            <p>No orders yet.</p>
+        {% endif %}
+    </div>
+{% endif %}
+{% endblock %}

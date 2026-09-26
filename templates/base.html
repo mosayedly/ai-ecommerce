@@ -1,0 +1,51 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AI Shop{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body data-authenticated="{% if user.is_authenticated %}true{% else %}false{% endif %}">
+    <header class="site-header">
+        <nav class="navbar container">
+            <a class="brand" href="{% url 'home' %}">🛍️ AI Shop</a>
+            <div class="nav-links">
+                <a href="{% url 'product_list' %}">Products</a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'cart_detail' %}">Cart <span id="cart-count" class="badge">{{ cart_count }}</span></a>
+                    <a href="{% url 'order_history' %}">My Orders</a>
+                    <a href="{% url 'recommendations' %}">For You</a>
+                    <span class="nav-user">Hi, {{ user.username }}</span>
+                    <form method="post" action="{% url 'logout' %}" class="inline-form">
+                        {% csrf_token %}
+                        <button type="submit" class="link-button">Logout</button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'login' %}">Login</a>
+                    <a href="{% url 'register' %}">Register</a>
+                {% endif %}
+            </div>
+        </nav>
+    </header>
+
+    <main class="container">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">&copy; {% now "Y" %} AI-Powered E-Commerce</div>
+    </footer>
+
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

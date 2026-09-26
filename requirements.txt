@@ -1,0 +1,8 @@
+Django==6.1.1
+psycopg2-binary==2.9.13
+python-dotenv==1.2.3
+openai==3.13.0
+pillow==12.3.0
+django-extensions==4.1
+graphviz==0.21
+pydot==4.0.1

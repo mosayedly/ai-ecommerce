@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Recommended for You — AI Shop{% endblock %}
+{% block content %}
+<h1>Recommended for You</h1>
+
+{% if personalized_fallback %}
+    <p class="rec-note">Personalized picks are temporarily unavailable — showing popular items in your interests instead.</p>
+{% endif %}
+
+{% if personalized %}
+<section>
+    <h2>Personalized for you</h2>
+    <div class="product-grid">
+        {% for rec in personalized %}
+            {% include "store/partials/recommendation_card.html" with rec=rec %}
+        {% endfor %}
+    </div>
+</section>
+{% else %}
+    <p class="empty">No personalized recommendations yet. Browse and shop to get tailored suggestions.</p>
+{% endif %}
+
+{% if trending %}
+<section>
+    <h2>Trending now</h2>
+    <div class="product-grid">
+        {% for rec in trending %}
+            {% include "store/partials/recommendation_card.html" with rec=rec %}
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+{% endblock %}

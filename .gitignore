@@ -1,0 +1,58 @@
+# ── Python ─────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# ── Virtual environments ──────────────────────────────
+venv/
+venv_ce/
+env/
+ENV/
+.venv/
+
+# ── Django ─────────────────────────────────────────────
+*.log
+db.sqlite3
+db.sqlite3-journal
+staticfiles/
+media/
+
+# ── Environment ────────────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ── Testing ────────────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# ── IDEs ───────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ── OS ─────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Archives ───────────────────────────────────────────
+*.zip
+ai_ecommerce_backup_/
+
+# ── Internal / dev docs ───────────────────────────────
+MODELS_DRAFT.md
+PROJECT_STATE.md
+CONSTRAINTS.md
+DELIVERY_PLAN.md
+SHIPPING_CHECKLIST.md
+README_BUYER.md

@@ -1,0 +1,22 @@
+{% load static %}
+<div class="product-card">
+    <a class="product-card__image" href="{% url 'product_detail' product.slug %}">
+        {% if product.image %}
+            <img src="{{ product.image.url }}" alt="{{ product.name }}">
+        {% else %}
+            <img src="{% static 'img/placeholder.svg' %}" alt="{{ product.name }}">
+        {% endif %}
+    </a>
+    <div class="product-card__body">
+        <a href="{% url 'product_detail' product.slug %}"><h3>{{ product.name }}</h3></a>
+        <p class="price">${{ product.price }}</p>
+        <p class="stock {% if product.stock == 0 %}out{% endif %}">
+            {% if product.stock > 0 %}In stock ({{ product.stock }}){% else %}Out of stock{% endif %}
+        </p>
+        {% if user.is_authenticated and product.stock > 0 %}
+            <button type="button" class="btn btn-primary add-to-cart" data-product-id="{{ product.id }}">Add to Cart</button>
+        {% elif not user.is_authenticated %}
+            <a class="btn btn-outline" href="{% url 'login' %}">Login to buy</a>
+        {% endif %}
+    </div>
+</div>

@@ -1,0 +1,43 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% block title %}{{ form_title }} — Admin Dashboard{% endblock %}
+
+{% block dashboard_content %}
+{% include "dashboard/partials/messages.html" %}
+
+<div class="page-header">
+    <h1>{{ form_title }}</h1>
+    <a class="btn btn--ghost" href="{% url 'dashboard:category_list' %}">Cancel</a>
+</div>
+
+<form method="post" action="" class="dashboard-form">
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+        <div class="messages">
+            {% for error in form.non_field_errors %}
+                <div class="message message--error">{{ error }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% include "dashboard/partials/form_field.html" with field=form.name %}
+    {% include "dashboard/partials/form_field.html" with field=form.slug %}
+    {% include "dashboard/partials/form_field.html" with field=form.description %}
+
+    <div class="form-actions">
+        <button type="submit" class="btn btn--primary">Save Category</button>
+        <a class="btn btn--ghost" href="{% url 'dashboard:category_list' %}">Cancel</a>
+    </div>
+</form>
+
+{% if category %}
+<section class="danger-zone">
+    <h2>Danger Zone</h2>
+    <p>Deleting a category is permanent. Products in this category become uncategorized.</p>
+    <form method="post" action="{% url 'dashboard:category_delete' category.pk %}" onsubmit="return confirm('Are you sure?');">
+        {% csrf_token %}
+        <button type="submit" class="btn btn--danger">Delete Category</button>
+    </form>
+</section>
+{% endif %}
+{% endblock %}

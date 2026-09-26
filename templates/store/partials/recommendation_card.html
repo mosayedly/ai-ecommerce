@@ -1,0 +1,28 @@
+{% load static %}
+<div class="product-card recommendation-card" data-rec-product-id="{{ rec.product.id }}" data-rec-source="{{ rec.source }}">
+    <a class="product-card__image" href="{% url 'product_detail' rec.product.slug %}">
+        {% if rec.product.image %}
+            <img src="{{ rec.product.image.url }}" alt="{{ rec.product.name }}">
+        {% else %}
+            <img src="{% static 'img/placeholder.svg' %}" alt="{{ rec.product.name }}">
+        {% endif %}
+    </a>
+    <div class="product-card__body">
+        <a href="{% url 'product_detail' rec.product.slug %}"><h3>{{ rec.product.name }}</h3></a>
+        <p class="price">${{ rec.product.price }}</p>
+        {% if rec.reason %}
+            <p class="rec-reason">{{ rec.reason }}</p>
+        {% endif %}
+        <p class="stock {% if rec.product.stock == 0 %}out{% endif %}">
+            {% if rec.product.stock > 0 %}In stock ({{ rec.product.stock }}){% else %}Out of stock{% endif %}
+        </p>
+        {% if rec.score > 0 %}
+            <span class="rec-score">{% widthratio rec.score 1 100 %}% match</span>
+        {% endif %}
+        {% if user.is_authenticated and rec.product.stock > 0 %}
+            <button type="button" class="btn btn-primary add-to-cart" data-product-id="{{ rec.product.id }}">Add to Cart</button>
+        {% elif not user.is_authenticated %}
+            <a class="btn btn-outline" href="{% url 'login' %}">Login to buy</a>
+        {% endif %}
+    </div>
+</div>

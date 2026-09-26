@@ -1,0 +1,5 @@
+{% comment %}
+Reusable order-status badge.
+Usage: {% include 'dashboard/partials/status_badge.html' with status=order.status label=order.get_status_display %}
+{% endcomment %}
+<span class="badge badge--{% if status == 'pending' %}warning{% elif status == 'paid' %}success{% elif status == 'processing' %}info{% elif status == 'shipped' %}info{% elif status == 'delivered' %}success{% elif status == 'cancelled' %}danger{% else %}muted{% endif %}">{{ label|default:status }}</span>

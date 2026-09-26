@@ -1,0 +1,117 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% block title %}Order {{ order.order_number }} — Admin Dashboard{% endblock %}
+
+{% block dashboard_content %}
+{% include "dashboard/partials/messages.html" %}
+
+<div class="page-header">
+    <h1>Order #{{ order.order_number }}</h1>
+    <div class="table-actions">
+        {% include "dashboard/partials/status_badge.html" with status=order.status label=order.get_status_display %}
+        <a class="btn btn--ghost" href="{% url 'dashboard:order_list' %}">← Back to Orders</a>
+    </div>
+</div>
+
+<div class="order-layout">
+    <div>
+        <section>
+            <h2>Order Items</h2>
+            {% if order.items.all %}
+                <div class="table-wrap">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in order.items.all %}
+                            <tr>
+                                <td>{{ item.product.name }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td>${{ item.price }}</td>
+                                <td>${{ item.subtotal }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                </div>
+            {% else %}
+                <p class="empty">This order has no items.</p>
+            {% endif %}
+
+            <div class="order-summary">
+                <div class="order-summary__row">
+                    <span>Subtotal</span>
+                    <span>${{ order.total_price }}</span>
+                </div>
+                <div class="order-summary__row total">
+                    <span>Total</span>
+                    <span>${{ order.total_price }}</span>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Update Status</h2>
+            <form method="post" action="{% url 'dashboard:order_detail' order.order_number %}" class="filter-bar">
+                {% csrf_token %}
+                <select name="status" class="form-select">
+                    {% for value, label in status_choices %}
+                        <option value="{{ value }}" {% if value == order.status %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn--primary">Update Status</button>
+            </form>
+            <p class="meta-text">Setting the status to “Delivered” records the completion time.</p>
+        </section>
+    </div>
+
+    <div>
+        <section class="user-card">
+            <h2>Customer</h2>
+            {% if order.user %}
+                <p class="user-card__name">{{ order.user.username }}</p>
+                <p class="meta-text">{{ order.user.email|default:"no email on file" }}</p>
+                <p class="meta-text">Joined {{ order.user.date_joined|date:"M d, Y" }}</p>
+                <a class="btn btn--ghost" href="{% url 'dashboard:user_detail' order.user.pk %}">View Customer</a>
+            {% else %}
+                <p class="meta-text">Guest order — the customer account no longer exists.</p>
+            {% endif %}
+        </section>
+
+        <section class="order-summary">
+            <h2>Shipping Address</h2>
+            <p class="meta-text">{{ order.shipping_address|default:"—"|linebreaksbr }}</p>
+            <h2>Notes</h2>
+            <p class="meta-text">{{ order.notes|default:"—"|linebreaksbr }}</p>
+        </section>
+
+        <section class="user-card">
+            <h2>Timeline</h2>
+            <ul class="timeline">
+                <li class="timeline__item">
+                    <span class="timeline__dot timeline__dot--created"></span>
+                    <strong>Created</strong>
+                    <p class="meta-text">{{ order.created_at|date:"M d, Y H:i" }}</p>
+                </li>
+                <li class="timeline__item">
+                    <span class="timeline__dot"></span>
+                    <strong>Last updated</strong>
+                    <p class="meta-text">{{ order.updated_at|date:"M d, Y H:i" }}</p>
+                </li>
+                <li class="timeline__item">
+                    <span class="timeline__dot{% if order.completed_at %} timeline__dot--done{% endif %}"></span>
+                    <strong>Completed</strong>
+                    <p class="meta-text">
+                        {% if order.completed_at %}{{ order.completed_at|date:"M d, Y H:i" }}{% else %}Not delivered yet{% endif %}
+                    </p>
+                </li>
+            </ul>
+        </section>
+    </div>
+</div>
+{% endblock %}

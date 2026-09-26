@@ -1,0 +1,95 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% block title %}Users — Admin Dashboard{% endblock %}
+
+{% block dashboard_content %}
+{% include "dashboard/partials/messages.html" %}
+
+<div class="page-header">
+    <h1>Users</h1>
+</div>
+
+<form method="get" action="{% url 'dashboard:user_list' %}" class="filter-bar">
+    <input type="text" name="q" class="form-input" value="{{ q }}" placeholder="Search username or email...">
+    <select name="is_staff" class="form-select">
+        <option value="">Staff: any</option>
+        <option value="true" {% if selected_is_staff == 'true' %}selected{% endif %}>Staff only</option>
+        <option value="false" {% if selected_is_staff == 'false' %}selected{% endif %}>Customers only</option>
+    </select>
+    <select name="is_active" class="form-select">
+        <option value="">Active: any</option>
+        <option value="true" {% if selected_is_active == 'true' %}selected{% endif %}>Active only</option>
+        <option value="false" {% if selected_is_active == 'false' %}selected{% endif %}>Inactive only</option>
+    </select>
+    <button type="submit" class="btn btn--primary">Apply</button>
+    {% if q or selected_is_staff or selected_is_active %}
+        <a class="btn btn--ghost" href="{% url 'dashboard:user_list' %}">Clear</a>
+    {% endif %}
+</form>
+
+{% if users %}
+    <div class="table-wrap">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Orders</th>
+                <th>Total Spent</th>
+                <th>Staff</th>
+                <th>Active</th>
+                <th>Joined</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for account in users %}
+                <tr>
+                    <td>{{ account.username }}</td>
+                    <td>{{ account.email|default:"—" }}</td>
+                    <td>{{ account.order_count }}</td>
+                    <td>${{ account.total_spent|default:0|floatformat:2 }}</td>
+                    <td>
+                        {% if account.is_staff %}
+                            <span class="badge badge--success">Staff</span>
+                        {% else %}
+                            <span class="badge badge--muted">Customer</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if account.is_active %}
+                            <span class="badge badge--success">Active</span>
+                        {% else %}
+                            <span class="badge badge--danger">Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ account.date_joined|date:"M d, Y" }}</td>
+                    <td>
+                        <div class="table-actions">
+                            <a class="btn btn--ghost" href="{% url 'dashboard:user_detail' account.pk %}">View</a>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+
+    <nav class="pagination">
+        {% if page_obj.has_previous %}
+            <a class="btn btn--ghost" href="{% url 'dashboard:user_list' %}?q={{ q|urlencode }}&is_staff={{ selected_is_staff|urlencode }}&is_active={{ selected_is_active|urlencode }}&page={{ page_obj.previous_page_number }}">Previous</a>
+        {% endif %}
+        <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+            <a class="btn btn--ghost" href="{% url 'dashboard:user_list' %}?q={{ q|urlencode }}&is_staff={{ selected_is_staff|urlencode }}&is_active={{ selected_is_active|urlencode }}&page={{ page_obj.next_page_number }}">Next</a>
+        {% endif %}
+    </nav>
+{% else %}
+    <div class="empty-state">
+        {% if q or selected_is_staff or selected_is_active %}
+            <p>No users match your filters.</p>
+        {% else %}
+            <p>No users yet.</p>
+        {% endif %}
+    </div>
+{% endif %}
+{% endblock %}

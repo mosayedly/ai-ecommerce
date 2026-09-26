@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Checkout — AI Shop{% endblock %}
+{% block content %}
+<h1>Checkout</h1>
+
+<div class="checkout-layout">
+    <form method="post" class="checkout-form">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        <p>
+            <label for="id_shipping_address">Shipping address:</label>
+            {{ form.shipping_address }}
+            {{ form.shipping_address.errors }}
+        </p>
+        <p>
+            <label for="id_notes">Notes (optional):</label>
+            {{ form.notes }}
+            {{ form.notes.errors }}
+        </p>
+        <button type="submit" class="btn btn-primary">Place Order</button>
+    </form>
+
+    <div class="order-summary">
+        <h2>Order Summary</h2>
+        <table class="summary-table">
+            {% for item in items %}
+                <tr>
+                    <td>{{ item.product.name }} × {{ item.quantity }}</td>
+                    <td>${{ item.subtotal }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+        <p class="total">Total: ${{ cart.total }}</p>
+    </div>
+</div>
+{% endblock %}

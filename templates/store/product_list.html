@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}{% if category %}{{ category.name }}{% else %}Products{% endif %} — AI Shop{% endblock %}
+{% block content %}
+<h1>{% if category %}{{ category.name }}{% else %}Products{% endif %}</h1>
+
+<form method="get" action="{% url 'product_list' %}" class="search-bar">
+    <input type="text" name="q" value="{{ q }}" placeholder="Search products...">
+    <select name="category">
+        <option value="">All categories</option>
+        {% for cat in categories %}
+            <option value="{{ cat.slug }}" {% if cat.slug == active_category %}selected{% endif %}>{{ cat.name }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit" class="btn">Search</button>
+</form>
+
+{% if page_obj %}
+    <div class="product-grid">
+        {% for product in page_obj %}
+            {% include "store/partials/product_card.html" with product=product %}
+        {% endfor %}
+    </div>
+
+    <nav class="pagination">
+        {% if page_obj.has_previous %}
+            <a href="{% url 'product_list' %}?q={{ q|urlencode }}&category={{ active_category|urlencode }}&page={{ page_obj.previous_page_number }}">Previous</a>
+        {% endif %}
+        <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+            <a href="{% url 'product_list' %}?q={{ q|urlencode }}&category={{ active_category|urlencode }}&page={{ page_obj.next_page_number }}">Next</a>
+        {% endif %}
+    </nav>
+{% else %}
+    <p class="empty">No products found.</p>
+{% endif %}
+{% endblock %}

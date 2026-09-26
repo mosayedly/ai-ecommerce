@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Cart — AI Shop{% endblock %}
+{% block content %}
+<h1>Your Cart</h1>
+
+<div id="cart-container">
+    {% if items %}
+        <table class="cart-table">
+            <thead>
+                <tr><th>Product</th><th>Price</th><th>Qty</th><th>Subtotal</th><th></th></tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                    <tr data-item-id="{{ item.id }}">
+                        <td><a href="{% url 'product_detail' item.product.slug %}">{{ item.product.name }}</a></td>
+                        <td>${{ item.product.price }}</td>
+                        <td><input type="number" class="qty-input" value="{{ item.quantity }}" min="1" max="{{ item.product.stock }}" data-item-id="{{ item.id }}"></td>
+                        <td class="subtotal">${{ item.subtotal }}</td>
+                        <td><button type="button" class="btn btn-danger remove-item" data-item-id="{{ item.id }}">Remove</button></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr><td colspan="3">Total</td><td id="cart-total">${{ cart.total }}</td><td></td></tr>
+            </tfoot>
+        </table>
+    {% else %}
+        <p class="empty">Your cart is empty.</p>
+    {% endif %}
+</div>
+
+<div class="cart-actions">
+    <a href="{% url 'product_list' %}" class="btn btn-outline">Continue shopping</a>
+    {% if items %}<a href="{% url 'checkout' %}" class="btn btn-primary" id="checkout-btn">Checkout</a>{% endif %}
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{% static 'js/cart.js' %}"></script>
+{% endblock %}

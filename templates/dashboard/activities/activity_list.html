@@ -1,0 +1,79 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% block title %}Activity Log — Admin Dashboard{% endblock %}
+
+{% block dashboard_content %}
+{% include "dashboard/partials/messages.html" %}
+
+<div class="page-header">
+    <h1>Activity Log</h1>
+</div>
+
+<form method="get" action="{% url 'dashboard:activity_list' %}" class="filter-bar">
+    <input type="text" name="q" class="form-input" value="{{ q }}" placeholder="Search username or product...">
+    <select name="activity_type" class="form-select">
+        <option value="">All activity types</option>
+        {% for value, label in activity_types %}
+            <option value="{{ value }}" {% if value == selected_type %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit" class="btn btn--primary">Apply</button>
+    {% if q or selected_type %}
+        <a class="btn btn--ghost" href="{% url 'dashboard:activity_list' %}">Clear</a>
+    {% endif %}
+</form>
+
+{% if activities %}
+    <div class="table-wrap">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>User</th>
+                <th>Activity Type</th>
+                <th>Product</th>
+                <th>Category</th>
+                <th>Metadata</th>
+                <th>Time</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for activity in activities %}
+                <tr>
+                    <td>
+                        {% if activity.user %}
+                            <a href="{% url 'dashboard:user_detail' activity.user.pk %}">{{ activity.user.username }}</a>
+                        {% else %}
+                            —
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="badge activity-badge activity-badge--{% if activity.activity_type == 'purchase' %}purchase{% elif activity.activity_type == 'add_to_cart' or activity.activity_type == 'remove_from_cart' %}cart{% elif activity.activity_type == 'search' %}search{% elif activity.activity_type == 'wishlist' %}wishlist{% elif activity.activity_type == 'view' %}view{% else %}other{% endif %}">{{ activity.get_activity_type_display }}</span>
+                    </td>
+                    <td>{{ activity.product.name|default:"—" }}</td>
+                    <td>{{ activity.category.name|default:"—" }}</td>
+                    <td class="meta-text">{{ activity.metadata|default:"—"|truncatechars:40 }}</td>
+                    <td>{{ activity.created_at|date:"M d, Y H:i" }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+
+    <nav class="pagination">
+        {% if page_obj.has_previous %}
+            <a class="btn btn--ghost" href="{% url 'dashboard:activity_list' %}?q={{ q|urlencode }}&activity_type={{ selected_type|urlencode }}&page={{ page_obj.previous_page_number }}">Previous</a>
+        {% endif %}
+        <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+            <a class="btn btn--ghost" href="{% url 'dashboard:activity_list' %}?q={{ q|urlencode }}&activity_type={{ selected_type|urlencode }}&page={{ page_obj.next_page_number }}">Next</a>
+        {% endif %}
+    </nav>
+{% else %}
+    <div class="empty-state">
+        {% if q or selected_type %}
+            <p>No activity matches your filters.</p>
+        {% else %}
+            <p>No activity recorded yet.</p>
+        {% endif %}
+    </div>
+{% endif %}
+{% endblock %}

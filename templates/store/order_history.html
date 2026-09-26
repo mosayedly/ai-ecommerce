@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}My Orders — AI Shop{% endblock %}
+{% block content %}
+<h1>My Orders</h1>
+
+{% if orders %}
+    <table class="orders-table">
+        <thead><tr><th>Order #</th><th>Date</th><th>Status</th><th>Total</th><th></th></tr></thead>
+        <tbody>
+            {% for order in orders %}
+                <tr>
+                    <td>{{ order.order_number|slice:":8" }}…</td>
+                    <td>{{ order.created_at|date:"M d, Y" }}</td>
+                    <td><span class="status status-{{ order.status }}">{{ order.get_status_display }}</span></td>
+                    <td>${{ order.total_price }}</td>
+                    <td><a href="{% url 'order_detail' order.order_number %}">View</a></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p class="empty">You have no orders yet.</p>
+{% endif %}
+{% endblock %}

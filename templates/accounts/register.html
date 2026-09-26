@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Register — AI Shop{% endblock %}
+{% block content %}
+<div class="auth-form">
+    <h1>Register</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        {% for field in form %}
+            <p>
+                {{ field.label_tag }}
+                {{ field }}
+                {{ field.errors }}
+                {% if field.help_text %}<small class="help">{{ field.help_text }}</small>{% endif %}
+            </p>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary">Register</button>
+    </form>
+    <p>Already have an account? <a href="{% url 'login' %}">Login</a></p>
+</div>
+{% endblock %}

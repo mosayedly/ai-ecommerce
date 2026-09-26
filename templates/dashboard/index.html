@@ -1,0 +1,150 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% block title %}Dashboard — AI Shop{% endblock %}
+
+{% block dashboard_content %}
+{% include "dashboard/partials/messages.html" %}
+
+<h1>Dashboard</h1>
+<p class="dashboard-subtitle">Store overview — products, orders, users and recent activity.</p>
+
+<!-- Section 1 — KPI cards -->
+<section>
+    <div class="stat-grid">
+        <div class="stat-card">
+            <span class="stat-card__icon">📦</span>
+            <div>
+                <p class="stat-card__value">{{ total_products }}</p>
+                <p class="stat-card__label">Total Products</p>
+                <p class="stat-card__meta">{{ active_products }} active</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <span class="stat-card__icon">🏷️</span>
+            <div>
+                <p class="stat-card__value">{{ total_categories }}</p>
+                <p class="stat-card__label">Total Categories</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <span class="stat-card__icon">📋</span>
+            <div>
+                <p class="stat-card__value">{{ total_orders }}</p>
+                <p class="stat-card__label">Total Orders</p>
+            </div>
+        </div>
+        <div class="stat-card stat-card--success">
+            <span class="stat-card__icon">💰</span>
+            <div>
+                <p class="stat-card__value">${{ total_revenue|floatformat:2 }}</p>
+                <p class="stat-card__label">Total Revenue</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <span class="stat-card__icon">👥</span>
+            <div>
+                <p class="stat-card__value">{{ total_users }}</p>
+                <p class="stat-card__label">Total Users</p>
+            </div>
+        </div>
+        <div class="stat-card stat-card--warning">
+            <span class="stat-card__icon">⚡</span>
+            <div>
+                <p class="stat-card__value">{{ recent_activities_count }}</p>
+                <p class="stat-card__label">Recent Activities</p>
+                <p class="stat-card__meta">last 30 days</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Section 2 — Recent orders -->
+<section>
+    <h2>Recent Orders</h2>
+    {% if recent_orders %}
+        <table class="orders-table">
+            <thead>
+                <tr>
+                    <th>Order #</th>
+                    <th>User</th>
+                    <th>Status</th>
+                    <th>Total</th>
+                    <th>Date</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in recent_orders %}
+                    <tr>
+                        <td>{{ order.order_number|slice:":8" }}…</td>
+                        <td>{{ order.user.username|default:"—" }}</td>
+                        <td><span class="status status-{{ order.status }}">{{ order.get_status_display }}</span></td>
+                        <td>${{ order.total_price }}</td>
+                        <td>{{ order.created_at|date:"M d, Y H:i" }}</td>
+                        <td>
+                            <div class="table-actions">
+                                <a class="btn btn--ghost" href="{% url 'dashboard:order_detail' order.order_number %}">View</a>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="empty">No orders yet.</p>
+    {% endif %}
+</section>
+
+<!-- Section 3 — Top products -->
+<section>
+    <h2>Top Products</h2>
+    {% if top_products %}
+        <ul class="dashboard-list">
+            {% for product in top_products %}
+                <li class="dashboard-list__item">
+                    <span><a href="{% url 'dashboard:product_edit' product.pk %}">{{ product.name }}</a></span>
+                    <span class="dashboard-list__stats">{{ product.purchase_count }} sold · {{ product.views_count }} views</span>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="empty">No active products yet.</p>
+    {% endif %}
+</section>
+
+<!-- Section 4 — Recent activity feed -->
+<section>
+    <h2>Recent Activity</h2>
+    {% if recent_activities %}
+        <ul class="dashboard-list">
+            {% for activity in recent_activities %}
+                <li class="dashboard-list__item">
+                    <span>
+                        <strong>{% if activity.user %}<a href="{% url 'dashboard:user_detail' activity.user.pk %}">{{ activity.user.username }}</a>{% else %}—{% endif %}</strong>
+                        {{ activity.get_activity_type_display }}
+                        {% if activity.product %}<em>{{ activity.product.name }}</em>{% endif %}
+                    </span>
+                    <span class="dashboard-list__meta">{{ activity.created_at|timesince }} ago</span>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="empty">No user activity recorded yet.</p>
+    {% endif %}
+</section>
+
+<!-- Section 5 — Orders by status (CSS bar chart) -->
+<section>
+    <h2>Orders by Status</h2>
+    <ul class="status-chart">
+        {% for row in orders_by_status %}
+            <li class="status-chart__row">
+                <span class="status-chart__label">{{ row.label }}</span>
+                <span class="status-chart__track">
+                    <span class="status-chart__bar status-chart__bar--{{ row.status }}" style="width: {{ row.percent }}%" data-width="{{ row.percent }}"></span>
+                </span>
+                <span class="status-chart__count">{{ row.count }}</span>
+            </li>
+        {% endfor %}
+    </ul>
+</section>
+{% endblock %}

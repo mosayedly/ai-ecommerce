@@ -1,0 +1,98 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% block title %}Products — Admin Dashboard{% endblock %}
+
+{% block dashboard_content %}
+{% include "dashboard/partials/messages.html" %}
+
+<div class="page-header">
+    <h1>Products</h1>
+    <a class="btn btn--primary" href="{% url 'dashboard:product_create' %}">＋ New Product</a>
+</div>
+
+<form method="get" action="{% url 'dashboard:product_list' %}" class="filter-bar">
+    <input type="text" name="q" class="form-input" value="{{ q }}" placeholder="Search name or description...">
+    <select name="category" class="form-select">
+        <option value="">All categories</option>
+        {% for category in categories %}
+            <option value="{{ category.slug }}" {% if category.slug == selected_category %}selected{% endif %}>{{ category.name }}</option>
+        {% endfor %}
+    </select>
+    <select name="status" class="form-select">
+        <option value="">All statuses</option>
+        {% for value, label in status_choices %}
+            <option value="{{ value }}" {% if value == selected_status %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit" class="btn btn--primary">Apply</button>
+    {% if q or selected_category or selected_status %}
+        <a class="btn btn--ghost" href="{% url 'dashboard:product_list' %}">Clear</a>
+    {% endif %}
+</form>
+
+{% if products %}
+    <div class="table-wrap">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Image</th>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th>Status</th>
+                <th>Featured</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in products %}
+                <tr>
+                    <td>
+                        {% if product.image %}
+                            <img class="product-thumbnail" src="{{ product.image.url }}" alt="{{ product.name }}">
+                        {% else %}
+                            <span class="product-thumbnail product-thumbnail--empty">—</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ product.name }}</td>
+                    <td>{{ product.category.name|default:"—" }}</td>
+                    <td>${{ product.price }}</td>
+                    <td>{{ product.stock }}</td>
+                    <td>
+                        <span class="badge badge--{% if product.status == 'active' %}success{% elif product.status == 'draft' %}warning{% else %}muted{% endif %}">{{ product.get_status_display }}</span>
+                    </td>
+                    <td>{% if product.is_featured %}✔{% else %}—{% endif %}</td>
+                    <td>
+                        <div class="table-actions">
+                            <a class="btn btn--ghost" href="{% url 'dashboard:product_edit' product.pk %}">Edit</a>
+                            <form method="post" action="{% url 'dashboard:product_delete' product.pk %}" onsubmit="return confirm('Are you sure?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn--danger">Delete</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+
+    <nav class="pagination">
+        {% if page_obj.has_previous %}
+            <a class="btn btn--ghost" href="{% url 'dashboard:product_list' %}?q={{ q|urlencode }}&category={{ selected_category|urlencode }}&status={{ selected_status|urlencode }}&page={{ page_obj.previous_page_number }}">Previous</a>
+        {% endif %}
+        <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+            <a class="btn btn--ghost" href="{% url 'dashboard:product_list' %}?q={{ q|urlencode }}&category={{ selected_category|urlencode }}&status={{ selected_status|urlencode }}&page={{ page_obj.next_page_number }}">Next</a>
+        {% endif %}
+    </nav>
+{% else %}
+    <div class="empty-state">
+        {% if q or selected_category or selected_status %}
+            <p>No products match your filters.</p>
+        {% else %}
+            <p>No products yet. Click "New Product" to add one.</p>
+        {% endif %}
+    </div>
+{% endif %}
+{% endblock %}

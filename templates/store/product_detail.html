@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ product.name }} — AI Shop{% endblock %}
+{% block content %}
+<nav class="breadcrumb"><a href="{% url 'product_list' %}">Products</a> / {{ product.name }}</nav>
+
+<div class="product-detail">
+    <div class="product-detail__image">
+        {% if product.image %}
+            <img src="{{ product.image.url }}" alt="{{ product.name }}">
+        {% else %}
+            <img src="{% static 'img/placeholder.svg' %}" alt="{{ product.name }}">
+        {% endif %}
+    </div>
+    <div class="product-detail__info">
+        <h1>{{ product.name }}</h1>
+        {% if product.category %}
+            <p class="category">Category: <a href="{% url 'category_products' product.category.slug %}">{{ product.category.name }}</a></p>
+        {% endif %}
+        <p class="price">${{ product.price }}</p>
+        <p class="description">{{ product.description|linebreaksbr }}</p>
+        <p class="stock {% if product.stock == 0 %}out{% endif %}">
+            {% if product.stock > 0 %}In stock ({{ product.stock }}){% else %}Out of stock{% endif %}
+        </p>
+        {% if user.is_authenticated %}
+            {% if product.stock > 0 %}
+                <form class="add-to-cart-form" data-product-id="{{ product.id }}">
+                    <label for="quantity">Qty:</label>
+                    <input type="number" id="quantity" name="quantity" value="1" min="1" max="{{ product.stock }}">
+                    <button type="submit" class="btn btn-primary">Add to Cart</button>
+                </form>
+            {% endif %}
+        {% else %}
+            <a class="btn btn-outline" href="{% url 'login' %}">Login to add to cart</a>
+        {% endif %}
+    </div>
+</div>
+
+{% if similar %}
+<section>
+    <h2>Similar Products</h2>
+    {% if similar_fallback %}
+        <p class="rec-note">AI suggestions are temporarily unavailable — showing similar items instead.</p>
+    {% endif %}
+    <div class="product-grid">
+        {% for rec in similar %}
+            {% include "store/partials/recommendation_card.html" with rec=rec %}
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+{% endblock %}

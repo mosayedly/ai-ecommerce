@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Order {{ order.order_number }} — AI Shop{% endblock %}
+{% block content %}
+<h1>Order {{ order.order_number }}</h1>
+<p>Placed: {{ order.created_at|date:"M d, Y H:i" }}</p>
+<p>Status: <span class="status status-{{ order.status }}">{{ order.get_status_display }}</span></p>
+<p>Shipping address: {{ order.shipping_address|linebreaksbr }}</p>
+{% if order.notes %}<p>Notes: {{ order.notes|linebreaksbr }}</p>{% endif %}
+
+<table class="orders-table">
+    <thead><tr><th>Product</th><th>Price</th><th>Qty</th><th>Subtotal</th></tr></thead>
+    <tbody>
+        {% for item in order.items.all %}
+            <tr>
+                <td>{{ item.product.name }}</td>
+                <td>${{ item.price }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>${{ item.subtotal }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+    <tfoot><tr><td colspan="3">Total</td><td>${{ order.total_price }}</td></tr></tfoot>
+</table>
+
+<a href="{% url 'order_history' %}" class="btn btn-outline">Back to orders</a>
+{% endblock %}

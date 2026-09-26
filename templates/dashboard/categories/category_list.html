@@ -1,0 +1,72 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% block title %}Categories — Admin Dashboard{% endblock %}
+
+{% block dashboard_content %}
+{% include "dashboard/partials/messages.html" %}
+
+<div class="page-header">
+    <h1>Categories</h1>
+    <a class="btn btn--primary" href="{% url 'dashboard:category_create' %}">＋ New Category</a>
+</div>
+
+<form method="get" action="{% url 'dashboard:category_list' %}" class="filter-bar">
+    <input type="text" name="q" class="form-input" value="{{ q }}" placeholder="Search name or description...">
+    <button type="submit" class="btn btn--primary">Apply</button>
+    {% if q %}
+        <a class="btn btn--ghost" href="{% url 'dashboard:category_list' %}">Clear</a>
+    {% endif %}
+</form>
+
+{% if categories %}
+    <div class="table-wrap">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Slug</th>
+                <th>Product Count</th>
+                <th>Created</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for category in categories %}
+                <tr>
+                    <td>{{ category.name }}</td>
+                    <td>{{ category.slug }}</td>
+                    <td><span class="badge badge--muted">{{ category.product_count }}</span></td>
+                    <td>{{ category.created_at|date:"M d, Y" }}</td>
+                    <td>
+                        <div class="table-actions">
+                            <a class="btn btn--ghost" href="{% url 'dashboard:category_edit' category.pk %}">Edit</a>
+                            <form method="post" action="{% url 'dashboard:category_delete' category.pk %}" onsubmit="return confirm('Are you sure?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn--danger">Delete</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+
+    <nav class="pagination">
+        {% if page_obj.has_previous %}
+            <a class="btn btn--ghost" href="{% url 'dashboard:category_list' %}?q={{ q|urlencode }}&page={{ page_obj.previous_page_number }}">Previous</a>
+        {% endif %}
+        <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+            <a class="btn btn--ghost" href="{% url 'dashboard:category_list' %}?q={{ q|urlencode }}&page={{ page_obj.next_page_number }}">Next</a>
+        {% endif %}
+    </nav>
+{% else %}
+    <div class="empty-state">
+        {% if q %}
+            <p>No categories match your search.</p>
+        {% else %}
+            <p>No categories yet. Click "New Category" to add one.</p>
+        {% endif %}
+    </div>
+{% endif %}
+{% endblock %}

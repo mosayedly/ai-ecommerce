@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}AI Shop — Home{% endblock %}
+{% block content %}
+<section class="hero">
+    <h1>Welcome to AI Shop</h1>
+    <p>Browse products and get AI-powered recommendations.</p>
+    <a href="{% url 'product_list' %}" class="btn btn-primary">Shop now</a>
+</section>
+
+{% if featured %}
+<section>
+    <h2>Featured Products</h2>
+    <div class="product-grid">
+        {% for product in featured %}
+            {% include "store/partials/product_card.html" with product=product %}
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+{% if trending %}
+<section>
+    <h2>Trending Now</h2>
+    <div class="product-grid">
+        {% for rec in trending %}
+            {% include "store/partials/recommendation_card.html" with rec=rec %}
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+{% if personalized %}
+<section>
+    <h2>Recommended for You</h2>
+    {% if personalized_fallback %}
+        <p class="rec-note">Personalized picks are temporarily unavailable — showing popular items in your interests instead.</p>
+    {% endif %}
+    <div class="product-grid">
+        {% for rec in personalized %}
+            {% include "store/partials/recommendation_card.html" with rec=rec %}
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+{% endblock %}
