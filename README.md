@@ -12,6 +12,18 @@ Together, OpenRouter, Ollama, or a custom endpoint).
 
 ---
 
+---
+
+## 🎥 Video Tutorial
+
+**▶️ [Watch the full demo on YouTube](https://youtu.be/3F8z9jy2rKM)** — Complete walkthrough: code explanation + live demo (~25 minutes)
+
+[![Watch the demo](https://img.youtube.com/vi/3F8z9jy2rKM/maxresdefault.jpg)](https://youtu.be/3F8z9jy2rKM)
+
+> **Language:** Arabic voiceover · English subtitles available (CC)
+
+---
+
 ## ✨ Features
 
 ### Core (FR-1 → FR-5)
