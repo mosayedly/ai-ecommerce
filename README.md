@@ -92,7 +92,7 @@ See [SETUP.md](SETUP.md) for detailed, cross-platform instructions.
 **TL;DR:**
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/mosayedly/ai-ecommerce
 cd ai_ecommerce
 python -m venv venv
 source venv/bin/activate          # Windows: .\venv\Scripts\Activate.ps1
